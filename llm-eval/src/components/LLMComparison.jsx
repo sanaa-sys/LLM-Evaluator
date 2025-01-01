@@ -3,12 +3,17 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import LLMResponse from './LLMResponse'
-
+import MetricsChart from './MetricsChart'
 export default function LLMComparison() {
     const [prompt, setPrompt] = useState('')
     const [responses, setResponses] = useState([])
+    console.log(responses);
+    console.log(prompt);
     const [isLoading, setIsLoading] = useState(false)
+    const [selectedMetric, setSelectedMetric] = useState('answerCorrectness')
+
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -27,6 +32,13 @@ export default function LLMComparison() {
         setIsLoading(false)
     }
 
+    const metrics = [
+        { value: 'answerCorrectness', label: 'Answer Correctness' },
+        { value: 'answerRelevancy', label: 'Answer Relevancy' },
+        { value: 'answerSimilarity', label: 'Answer Similarity' },
+        { value: 'faithfulness', label: 'Faithfulness' },
+    ]
+
     return (
         <div>
             <h1 className="text-3xl font-bold mb-4">Together AI LLM Comparison Tool with AutoEvals</h1>
@@ -44,11 +56,29 @@ export default function LLMComparison() {
                     {isLoading ? 'Comparing...' : 'Compare LLMs'}
                 </Button>
             </form>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 {responses.map((response, index) => (
                     <LLMResponse key={index} response={response} />
                 ))}
             </div>
+            {responses.length > 0 && (
+                <div className="mb-4">
+                    <Select value={selectedMetric} onValueChange={setSelectedMetric}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select metric" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {metrics.map((metric) => (
+                                <SelectItem key={metric.value} value={metric.value}>
+                                    {metric.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+            {responses.length > 0 && <MetricsChart data={responses} selectedMetric={selectedMetric} />}
+
         </div>
     )
 }
